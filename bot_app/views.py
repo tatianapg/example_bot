@@ -31,7 +31,6 @@ def index(request):
         if incoming_msg == 'hello':
             #response = "*Hi! I am the Quarantine Bot*"
             
-
             response = emoji.emojize("""
 Hi! I am the Quarantine Bot* :wave:
 Lets be friends :wink:
@@ -73,7 +72,7 @@ You can give me the following commands:
 
         elif incoming_msg == 'dog':
             #return a dog picture
-            r = requests.get('https://dog.ceo/api/breeds/image/random')
+            r = requests.get('https://dog.ceo/api/breeds/image/random')                              
             data = r.json()
             msg.media(data['message'])
             responded = True
@@ -85,16 +84,26 @@ You can give me the following commands:
             data = json.dumps({'searchText': search_text})
             result = ''
             #updates de apify task input with user's search query
-            r = requests.put('https://api.apify.com/v2/actor-tasks/o7PTf4BDcHhQbG7a2/input?token=qTt3H59g5qoWzesLWXeBKhsXu&ui=1', data = data, headers={"content-type": "application/json"})
+            r = requests.put('https://api.apify.com/v2/actor-tasks/tatianag~my-task/input?token=yqYCQRk7KWc3rNL9ZkMzeK2cg', data = data, headers={"content-type": "application/json"})
+            ###registro original
+            #r = requests.put('https://api.apify.com/v2/actor-tasks/o7PTf4BDcHhQbG7a2/input?token=qTt3H59g5qoWzesLWXeBKhsXu&ui=1', data = data, headers={"content-type": "application/json"})
+            ###registro dado por apify
+            #https://api.apify.com/v2/actor-tasks/3xT3s9tIArhibVSgw/input?token=yqYCQRk7KWc3rNL9ZkMzeK2cg
+            print(f'primer status code:{r.status_code}')
             if r.status_code != 200:
-                result = 'Sorry, I can not search for receips.'
+                result = 'Sorry, I can not search for recipes.'
 
             #search in allrecipes for the top 5 search results
-            r = requests.post('https://api.apify/com/v2/actor-tasks/o7PTf4BDcHhQbG7a2/runs?token=qTt3H59g5qoWzesLWXeBKhsXu&ui=1')            
+            ###r = requests.post('https://api.apify.com/v2/actor-tasks/3xT3s9tIArhibVSgw/runs?token=yqYCQRk7KWc3rNL9ZkMzeK2cg&ui=1')
+            r = requests.post('https://api.apify.com/v2/actor-tasks/tatianag~my-task/runs?token=yqYCQRk7KWc3rNL9ZkMzeK2cg')
 
+            ###r = requests.post('https://api.apify/com/v2/actor-tasks/o7PTf4BDcHhQbG7a2/runs?token=qTt3H59g5qoWzesLWXeBKhsXu&ui=1')            
+            ###https://api.apify.com/v2/actor-tasks/3xT3s9tIArhibVSgw/runs?token=yqYCQRk7KWc3rNL9ZkMzeK2cg
+            print(f'segundo status code:{r.status_code}')               
             if r.status_code != 201:
                 result = 'Sorry, I can not search allrecipes.com at this time'
-               
+
+
             if not result:
                 result = emoji.emojize("I am searching allrecipes.com for the best {} recipes. :fork_and_knife:".format(search_text), use_aliases = True)
                 result += "\nPlease wait for a few moments before typing 'get recipe' to get your recipes!"
@@ -102,9 +111,9 @@ You can give me the following commands:
             msg.body(result)
             responded = True
 
-        elif incoming_msg == 'get_recipe':
+        elif incoming_msg == 'get recipe':
             #get tha las run details
-            r = requests.get('https://api.apify.com/v2/actor-tasks/o7PTf4BDcHhQbG7a2/runs/last?token=qTt3H59g5qoWzesLWXeBKhsXu')
+            r = requests.get('https://api.apify.com/v2/actor-tasks/tatianag~my-task/runs/last?token=yqYCQRk7KWc3rNL9ZkMzeK2cg')
 
             if r.status_code == 200:
                 data = r.json()
@@ -113,9 +122,10 @@ You can give me the following commands:
                 if data['data']['status'] == "RUNNING":
                     result = 'Sorry, your previous query is still running'
                     result += "\nPlease wait for a few moments before typing 'get recipe' again!"
-                elif data['data']['status'] == "SUCCEED":
+                elif data['data']['status'] == "SUCCEEDED":
                     #get the last run dataset items
-                    r = requests.get('https://api.apify.com/v2/actor-tasks/o7PTf4BDcHhQbG7a2/runs/last/dataset/items?token=qTt3H59g5qoWzesLWXeBKhsXu')
+                    #r = requests.get('https://api.apify.com/v2/actor-tasks/o7PTf4BDcHhQbG7a2/runs/last/dataset/items?token=qTt3H59g5qoWzesLWXeBKhsXu')
+                    r = requests.get('https://api.apify.com/v2/actor-tasks/tatianag~my-task/runs/last/dataset/items?token=yqYCQRk7KWc3rNL9ZkMzeK2cg')
                     data = r.json()
 
                     if data:
@@ -127,7 +137,7 @@ You can give me the following commands:
                             rating_count = recipe_data['ratingcount']
                             prep = recipe_data['prep']
                             cook = recipe_data['cook']
-                            ready_in = recipe_data['ready_in']
+                            ready_in = recipe_data['ready in']
                             calories = recipe_data['calories']
                             result += """
 *{}*                        
