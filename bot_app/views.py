@@ -32,7 +32,7 @@ def index(request):
             #response = "*Hi! I am the Quarantine Bot*"
             
             response = emoji.emojize("""
-Hi! I am the Quarantine Bot* :wave:
+*Hi! I am the Quarantine Bot* :wave:
 Lets be friends :wink:
 You can give me the following commands:
 :black_small_square: *'quote':* Hear an inspirational quote :rocket:
@@ -157,6 +157,7 @@ Recipe: {}
 
             msg.body(result)
             responded = True
+
         elif incoming_msg == 'news':
             r = requests.get('https://newsapi.org/v2/top-headlines?sources=bbc-news,the-washington-post,the-wall-street-journal,cnn,fox-news,cnbc,abc-news,business-insider-uk,google-news-uk,independent&apiKey=3ff5909978da49b68997fd2a1e21fae8')
 
@@ -194,7 +195,9 @@ _Published at {:}/{:}/{:} {:}:{}:{} UTC_
 
         elif incoming_msg.startswith('statistics'):
             #run task to aggregate covid news
+            #https://api.apify.com/v2/actor-tasks/tatianag~my-task/input?token=yqYCQRk7KWc3rNL9ZkMzeK2cg
             requests.post('https://api.apify.com/v2/actor-tasks/5MjRnMQJNMQ8TybLD/run-sync?token=qTt3H59g5qoWzesLWXeBKhsXu&ui=1')
+            #requests.post('https://api.apify.com/v2/actor-tasks/tatianag~my-task/run-sync?token=yqYCQRk7KWc3rNL9ZkMzeK2cg')
 
             #get the last run dataset items
             r = requests.get('https://api.apify.com/v2/actor-tasks/5MjRnMQJNMQ8TybLD/runs/last/dataset/items?token=qTt3H59g5qoWzesLWXeBKhsXu')
@@ -202,19 +205,28 @@ _Published at {:}/{:}/{:} {:}:{}:{} UTC_
                 data = r.json()
                 country = incoming_msg.replace('statistics', '')
                 country = country.strip()
+                print(country)
                 country_data = list(filter(lambda x: x['country'].lower().startswith(country), data))
                 if(country_data):
                     result = ''
                     for i in range(len(country_data)):
                         data_dict = country_data[i]
-                        last_updated = datetime.datetime.strptime(data_dict.get('lastUpdateApify', None), "%Y-%m-%d%H:%M:%S.%fZ")
+                        print('Print data dictionary.......')
+                        print(data_dict)
+                        lateDate = data_dict.get('lastUpdatedApify', None)
+                        if lateDate:
+                            last_updated = datetime.datetime.strptime(lateDate, "%Y-%m-%dT%H:%M:%S.%fZ")
+                        """    
+                        else:
+                            last_updated = datetime.datetime.now()
+                        """
                         result += """
 *Statistics for country {}*
 Infected: {}
 Tested: {}
 Recovered: {}
 Deceased: {}
-Last updated: {:02}/{:02}/{:02} {:02}:{02}:{03} UTC
+Last updated: {}/{}/{} {}:{}:{} UTC
 """.format(
     data_dict['country'],
     data_dict.get('infected', 'NA'),
@@ -232,6 +244,7 @@ Last updated: {:02}/{:02}/{:02} {:02}:{02}:{03} UTC
                     result = "Country data not found"
             else:
                 result = "I can not retrieve statistics at this time"        
+
             msg.body(result)    
             responded = True
 
